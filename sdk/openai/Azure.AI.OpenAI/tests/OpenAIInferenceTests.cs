@@ -78,5 +78,35 @@ namespace Azure.AI.OpenAI.Tests
             var exception = Assert.ThrowsAsync<RequestFailedException>(async () => { await client.GetCompletionsAsync("BAD_DEPLOYMENT_ID", completionsRequest); });
             Assert.AreEqual(401, exception.Status);
         }
+
+        /// <summary>
+        /// Exercises usage information within a completions response.
+        /// </summary>
+        /// <returns></returns>
+        [RecordedTest]
+        public async Task CompletionUsageTest()
+        {
+            OpenAIClient client = GetClient();
+            CompletionsOptions requestOptions = new CompletionsOptions()
+            {
+                Prompt =
+                {
+                    "Hello world",
+                    "This is a test",
+                },
+                MaxTokens = 1024,
+                N = 3,
+                Logprobs = 1,
+            };
+            Response<Completions> response = await client.GetCompletionsAsync(CompletionsDeploymentId, requestOptions);
+            Assert.That(response.Value, Is.Not.Null);
+            Assert.That(response.Value.Choices, Is.Not.Null.Or.Empty);
+            Assert.That(response.Value.Choices.Count, Is.EqualTo(requestOptions.Prompt.Count * requestOptions.N), "Each prompt should produce N choices");
+            Assert.That(response.Value.Usage, Is.Not.Null);
+            Assert.That(response.Value.Usage.TotalTokens, Is.GreaterThan(0));
+            Assert.That(response.Value.Usage.TotalTokens, Is.EqualTo(response.Value.Usage.CompletionToken + response.Value.Usage.PromptTokens));
+            Assert.That(response.Value.Choices[0].Logprobs, Is.Not.Null);
+            Assert.That(response.Value.Choices[0].Logprobs.Tokens.Count, Is.LessThan(response.Value.Usage.TotalTokens));
+        }
     }
 }
