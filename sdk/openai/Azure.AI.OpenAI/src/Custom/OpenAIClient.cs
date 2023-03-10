@@ -67,7 +67,7 @@ namespace Azure.AI.OpenAI
                 HttpMessage message = CreateGetCompletionsRequest(deploymentId, streamingContent, context);
                 message.BufferResponse = false;
                 Response baseResponse = _pipeline.ProcessMessage(message, context, cancellationToken);
-                return Response.FromValue(new StreamingCompletions(baseResponse), baseResponse);
+                return Response.FromValue(new StreamingCompletions(baseResponse, cancellationToken), baseResponse);
             }
             catch (Exception e)
             {
@@ -101,7 +101,7 @@ namespace Azure.AI.OpenAI
                     message,
                     context,
                     cancellationToken).ConfigureAwait(false);
-                return Response.FromValue(new StreamingCompletions(baseResponse), baseResponse);
+                return Response.FromValue(new StreamingCompletions(baseResponse, cancellationToken), baseResponse);
             }
             catch (Exception e)
             {

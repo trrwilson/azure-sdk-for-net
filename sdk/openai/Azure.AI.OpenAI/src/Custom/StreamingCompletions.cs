@@ -43,7 +43,7 @@ namespace Azure.AI.OpenAI
         /// </summary>
         public string Id => GetLocked(() => _baseCompletions.First().Id);
 
-        internal StreamingCompletions(Response response)
+        internal StreamingCompletions(Response response, CancellationToken cancellationToken)
         {
             _baseResponse = response;
             _baseResponseReader = new SseReader(response.ContentStream);
@@ -55,6 +55,12 @@ namespace Azure.AI.OpenAI
             {
                 while (true)
                 {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        _baseResponse.ContentStream.Dispose();
+                        break;
+                    }
+
                     SseLine? sseEvent = await _baseResponseReader.TryReadSingleFieldEventAsync().ConfigureAwait(false);
                     if (sseEvent == null)
                     {
@@ -103,7 +109,7 @@ namespace Azure.AI.OpenAI
 
                 _streamingTaskComplete = true;
                 _updateAvailableEvent.Set();
-            });
+            }, CancellationToken.None);
         }
 
         public async IAsyncEnumerable<StreamingChoice> GetChoicesStreaming(

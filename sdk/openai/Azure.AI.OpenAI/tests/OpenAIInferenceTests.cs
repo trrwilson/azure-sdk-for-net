@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core.TestFramework;
 using NUnit.Framework;
@@ -294,6 +296,139 @@ namespace Azure.AI.OpenAI.Tests
                 }
             }
         }
+
+        //[RecordedTest]
+        //public async Task CompletionsCanBeCanceled()
+        //{
+        //    CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+
+        //    OpenAIClient client = GetClient();
+        //    CompletionsOptions requestOptions = new CompletionsOptions()
+        //    {
+        //        Prompt =
+        //        {
+        //            "Write three paragraphs discussing the key considerations around parakeet populations worldwide",
+        //        },
+        //        MaxTokens = 1024,
+        //    };
+
+        //    Stopwatch cancellationStopwatch = default;
+        //    _ = Task.Run(async () =>
+        //    {
+        //        await Task.Delay(TimeSpan.FromSeconds(2));
+        //        cancellationStopwatch = Stopwatch.StartNew();
+        //        cancelTokenSource.Cancel();
+        //    });
+
+        //    bool gotExpectedException = false;
+
+        //    try
+        //    {
+        //        Response<Completions> response = await client.GetCompletionsAsync(
+        //            CompletionsDeploymentId,
+        //            requestOptions,
+        //            cancelTokenSource.Token);
+        //    }
+        //    catch (OperationCanceledException)
+        //    {
+        //        gotExpectedException = true;
+        //    }
+
+        //    Assert.IsTrue(gotExpectedException);
+
+        //    Assert.That(cancellationStopwatch, Is.Not.Null);
+        //    Assert.That(cancellationStopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
+        //}
+
+        //[RecordedTest]
+        //public async Task StreamingCompletionsCanBeCancelled()
+        //{
+        //    CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+
+        //    OpenAIClient client = GetClient();
+        //    CompletionsOptions requestOptions = new CompletionsOptions()
+        //    {
+        //        Prompt =
+        //        {
+        //            "Write three paragraphs discussing the key considerations around parakeet populations worldwide",
+        //        },
+        //        MaxTokens = 1024,
+        //    };
+
+        //    TaskCompletionSource<bool> responseStarted = new TaskCompletionSource<bool>(
+        //        TaskCreationOptions.RunContinuationsAsynchronously);
+
+        //    Stopwatch cancellationStopwatch = default;
+        //    _ = Task.Run(async () =>
+        //    {
+        //        await responseStarted.Task;
+        //        cancellationStopwatch = Stopwatch.StartNew();
+        //        cancelTokenSource.Cancel();
+        //    });
+
+        //    bool gotExpectedException = false;
+
+        //    try
+        //    {
+        //        Response<StreamingCompletions> response = await client.GetCompletionsStreamingAsync(
+        //            CompletionsDeploymentId,
+        //            requestOptions,
+        //            cancelTokenSource.Token);
+
+        //        await foreach (StreamingChoice choice in response.Value.GetChoicesStreaming(cancelTokenSource.Token))
+        //        {
+        //            await foreach (var text in choice.GetTextStreaming(cancelTokenSource.Token))
+        //            {
+        //                if (!responseStarted.Task.IsCompleted)
+        //                {
+        //                    responseStarted.TrySetResult(true);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch (OperationCanceledException)
+        //    {
+        //        gotExpectedException = true;
+        //    }
+
+        //    Assert.IsTrue(gotExpectedException);
+
+        //    Assert.That(cancellationStopwatch, Is.Not.Null);
+        //    Assert.That(cancellationStopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
+        //}
+
+        //[RecordedTest]
+        //public async Task EmbeddingsCanBeCanceled()
+        //{
+        //    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+        //    OpenAIClient client = GetClient();
+
+        //    bool gotExpectedException = false;
+        //    Stopwatch cancellationStopwatch = default;
+
+        //    _ = Task.Run(async () =>
+        //    {
+        //        await Task.Delay(TimeSpan.FromMilliseconds(200));
+        //        cancellationStopwatch = Stopwatch.StartNew();
+        //        cancellationTokenSource.Cancel();
+        //    });
+
+        //    try
+        //    {
+        //        _ = await client.GetEmbeddingsAsync(
+        //            EmbeddingsDeploymentId,
+        //            new EmbeddingsOptions("lorem ipsum"),
+        //            cancellationTokenSource.Token);
+        //    }
+        //    catch (OperationCanceledException)
+        //    {
+        //        gotExpectedException = true;
+        //    }
+
+        //    Assert.IsTrue(gotExpectedException);
+        //    Assert.That(cancellationStopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
+        //}
 
         // Lightweight reimplementation of .NET 7 .ToBlockingEnumerable().ToList()
         private static async Task<IReadOnlyList<T>> GetBlockingListFromIAsyncEnumerable<T>(
